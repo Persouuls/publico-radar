@@ -1,0 +1,25 @@
+The following Android vector drawables are derived from AndroidX Compose
+Material Icons 1.7.8:
+
+- app/src/main/res/drawable/ic_bookmark.xml
+- app/src/main/res/drawable/ic_bookmark_border.xml
+- app/src/main/res/drawable/ic_calendar_month.xml
+- app/src/main/res/drawable/ic_cloud_upload.xml
+- app/src/main/res/drawable/ic_description.xml
+- app/src/main/res/drawable/ic_error_outline.xml
+- app/src/main/res/drawable/ic_filter_list.xml
+- app/src/main/res/drawable/ic_inventory_2.xml
+- app/src/main/res/drawable/ic_manage_search.xml
+- app/src/main/res/drawable/ic_menu_book.xml
+- app/src/main/res/drawable/ic_radar.xml
+- app/src/main/res/drawable/ic_search_off.xml
+- app/src/main/res/drawable/ic_storage.xml
+- app/src/main/res/drawable/ic_timeline.xml
+- app/src/main/res/drawable/ic_upload_file.xml
+
+Copyright 2025 The Android Open Source Project.
+Licensed under the Apache License, Version 2.0. The icon path data was converted
+to Android VectorDrawable XML; ic_manage_search.xml is marked auto-mirrored to
+preserve the original Compose icon's right-to-left behavior.
+
+The Apache License 2.0 text is included in Apache-2.0.txt.

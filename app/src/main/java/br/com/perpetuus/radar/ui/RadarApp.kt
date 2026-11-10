@@ -3,6 +3,7 @@ package br.com.perpetuus.radar.ui
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,27 +32,8 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Search
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.Database
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Radar
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.Timeline
-import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -93,12 +75,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContentColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -125,12 +110,30 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-private enum class Destination(val label: String, val icon: ImageVector) {
-    HOME("Início", Icons.Filled.Home),
-    RADAR("Radar", Icons.Filled.Radar),
-    SAVED("Salvos", Icons.Filled.BookmarkBorder),
-    AGENDA("Agenda", Icons.Filled.CalendarMonth),
-    DATA("Dados", Icons.Filled.Storage)
+private sealed interface IconAsset {
+    data class Vector(val imageVector: ImageVector) : IconAsset
+    data class Resource(@DrawableRes val id: Int) : IconAsset
+}
+
+@Composable
+private fun AppIcon(
+    icon: IconAsset,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    tint: Color = LocalContentColor.current
+) {
+    when (icon) {
+        is IconAsset.Vector -> Icon(icon.imageVector, contentDescription, modifier, tint)
+        is IconAsset.Resource -> Icon(painterResource(icon.id), contentDescription, modifier, tint)
+    }
+}
+
+private enum class Destination(val label: String, val icon: IconAsset) {
+    HOME("Início", IconAsset.Vector(Icons.Filled.Home)),
+    RADAR("Radar", IconAsset.Resource(R.drawable.ic_radar)),
+    SAVED("Salvos", IconAsset.Resource(R.drawable.ic_bookmark_border)),
+    AGENDA("Agenda", IconAsset.Resource(R.drawable.ic_calendar_month)),
+    DATA("Dados", IconAsset.Resource(R.drawable.ic_storage))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -219,7 +222,7 @@ fun RadarApp(repository: RadarRepository) {
                 actions = {
                     if (selectedRecord == null && currentDestination != Destination.DATA) {
                         IconButton(onClick = { destination = Destination.DATA.name }) {
-                            Icon(Icons.Filled.Storage, contentDescription = "Dados e atualizações")
+                            AppIcon(IconAsset.Resource(R.drawable.ic_storage), contentDescription = "Dados e atualizações")
                         }
                     }
                 },
@@ -233,7 +236,7 @@ fun RadarApp(repository: RadarRepository) {
                         NavigationBarItem(
                             selected = currentDestination == item,
                             onClick = { destination = item.name },
-                            icon = { Icon(item.icon, contentDescription = item.label) },
+                            icon = { AppIcon(item.icon, contentDescription = item.label) },
                             label = { Text(item.label, maxLines = 1) }
                         )
                     }
@@ -336,9 +339,9 @@ private fun HomeScreen(
         item { RadarOverviewCard(recordCount = records.size, version = version, onOpen = onOpenRadar) }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                MetricTile("Registros", records.size.toString(), Icons.Filled.Description, Modifier.weight(1f))
-                MetricTile("Salvos", savedCount.toString(), Icons.Filled.BookmarkBorder, Modifier.weight(1f))
-                MetricTile("Marcos", upcoming.toString(), Icons.Filled.CalendarMonth, Modifier.weight(1f))
+                MetricTile("Registros", records.size.toString(), IconAsset.Resource(R.drawable.ic_description), Modifier.weight(1f))
+                MetricTile("Salvos", savedCount.toString(), IconAsset.Resource(R.drawable.ic_bookmark_border), Modifier.weight(1f))
+                MetricTile("Marcos", upcoming.toString(), IconAsset.Resource(R.drawable.ic_calendar_month), Modifier.weight(1f))
             }
         }
         item {
@@ -360,7 +363,7 @@ private fun HomeScreen(
         item {
             OutlinedCard(onClick = onOpenData, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
                 Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Database, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    AppIcon(IconAsset.Resource(R.drawable.ic_storage), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text("Acervo e atualizações", fontWeight = FontWeight.SemiBold)
@@ -414,10 +417,10 @@ private fun RadarGlyph(modifier: Modifier = Modifier, subtle: Boolean = true) {
 }
 
 @Composable
-private fun MetricTile(label: String, value: String, icon: ImageVector, modifier: Modifier = Modifier) {
+private fun MetricTile(label: String, value: String, icon: IconAsset, modifier: Modifier = Modifier) {
     OutlinedCard(modifier = modifier, shape = RoundedCornerShape(16.dp), colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+            AppIcon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
             Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
             Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
         }
@@ -438,7 +441,7 @@ private fun EmptyPriorityCard(onOpen: () -> Unit) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.size(34.dp)) {
-                    Box(contentAlignment = Alignment.Center) { Icon(Icons.Filled.FilterList, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
+                    Box(contentAlignment = Alignment.Center) { AppIcon(IconAsset.Resource(R.drawable.ic_filter_list), contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
                 }
                 Column(Modifier.weight(1f)) {
                     Text("Nenhuma prioridade cadastrada", fontWeight = FontWeight.Medium)
@@ -460,7 +463,7 @@ private fun ActivitySection(events: List<EventEntity>) {
         OutlinedCard(shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Timeline, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    AppIcon(IconAsset.Resource(R.drawable.ic_timeline), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.width(8.dp))
                     Text("Sem movimentações por enquanto", fontWeight = FontWeight.Medium)
                 }
@@ -550,7 +553,7 @@ private fun RadarScreen(records: List<RecordEntity>, onOpen: (RecordEntity) -> U
         item {
             OutlinedTextField(
                 value = query, onValueChange = { query = it }, modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Buscar no acervo") }, leadingIcon = { Icon(Icons.AutoMirrored.Filled.Search, contentDescription = null) },
+                placeholder = { Text("Buscar no acervo") }, leadingIcon = { AppIcon(IconAsset.Resource(R.drawable.ic_manage_search), contentDescription = null) },
                 singleLine = true, shape = RoundedCornerShape(16.dp)
             )
         }
@@ -566,7 +569,7 @@ private fun RadarScreen(records: List<RecordEntity>, onOpen: (RecordEntity) -> U
                     selected = showMoreFilters || hasExtraFilters,
                     onClick = { showMoreFilters = !showMoreFilters },
                     label = { Text(if (showMoreFilters) "Ocultar filtros" else "Mais filtros") },
-                    leadingIcon = { Icon(Icons.Filled.FilterList, contentDescription = null, modifier = Modifier.size(17.dp)) }
+                    leadingIcon = { AppIcon(IconAsset.Resource(R.drawable.ic_filter_list), contentDescription = null, modifier = Modifier.size(17.dp)) }
                 )
                 if (hasExtraFilters) Text("Filtros ativos", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.weight(1f))
@@ -680,7 +683,7 @@ private fun EmptyRadarState() {
 @Composable
 private fun EmptySearchState() {
     Column(Modifier.fillMaxWidth().padding(vertical = 36.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Icon(Icons.Filled.SearchOff, contentDescription = null, modifier = Modifier.size(34.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        AppIcon(IconAsset.Resource(R.drawable.ic_search_off), contentDescription = null, modifier = Modifier.size(34.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         Text("Nenhum resultado encontrado", fontWeight = FontWeight.SemiBold)
         Text("Tente outro termo ou ajuste os filtros.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
     }
@@ -693,7 +696,7 @@ private fun RecordCard(record: RecordEntity, onOpen: () -> Unit, onSave: () -> U
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(typeLabel(record.type).uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 IconButton(onClick = onSave) {
-                    Icon(if (record.isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, contentDescription = if (record.isSaved) "Remover dos salvos" else "Salvar pauta", tint = MaterialTheme.colorScheme.primary)
+                    AppIcon(IconAsset.Resource(if (record.isSaved) R.drawable.ic_bookmark else R.drawable.ic_bookmark_border), contentDescription = if (record.isSaved) "Remover dos salvos" else "Salvar pauta", tint = MaterialTheme.colorScheme.primary)
                 }
             }
             Text(record.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -760,7 +763,7 @@ private fun SavedScreen(records: List<RecordEntity>, onOpen: (RecordEntity) -> U
         if (records.isEmpty()) item {
             OutlinedCard(shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.fillMaxWidth().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Icon(Icons.Filled.BookmarkBorder, contentDescription = null, modifier = Modifier.size(36.dp), tint = MaterialTheme.colorScheme.primary)
+                    AppIcon(IconAsset.Resource(R.drawable.ic_bookmark_border), contentDescription = null, modifier = Modifier.size(36.dp), tint = MaterialTheme.colorScheme.primary)
                     Text("Ainda sem itens salvos", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
                     Text("Ao encontrar uma pauta importante, use o marcador para mantê-la nesta área.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Button(onClick = onExplore) { Text("Explorar o radar") }
@@ -783,7 +786,7 @@ private fun AgendaScreen(events: List<EventEntity>) {
             OutlinedCard(shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(30.dp))
+                        AppIcon(IconAsset.Resource(R.drawable.ic_calendar_month), contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(30.dp))
                         Spacer(Modifier.width(10.dp))
                         Text("Nenhum marco registrado", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
                     }
@@ -819,7 +822,7 @@ private fun RecordDetailScreen(record: RecordEntity, onSave: () -> Unit) {
                 StatusPill(typeLabel(record.type))
                 record.factualStatus?.let { StatusPill(it) }
                 Spacer(Modifier.weight(1f))
-                IconButton(onClick = onSave) { Icon(if (record.isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, contentDescription = "Alternar salvo") }
+                IconButton(onClick = onSave) { AppIcon(IconAsset.Resource(if (record.isSaved) R.drawable.ic_bookmark else R.drawable.ic_bookmark_border), contentDescription = "Alternar salvo") }
             }
             Text(record.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
             record.officialId?.let { Text(it, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
@@ -1022,7 +1025,7 @@ private fun DataScreen(
             OutlinedCard(shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.Storage, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        AppIcon(IconAsset.Resource(R.drawable.ic_storage), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.width(9.dp))
                         Text("Estado do acervo", fontWeight = FontWeight.SemiBold)
                         Spacer(Modifier.weight(1f))
@@ -1041,14 +1044,14 @@ private fun DataScreen(
             OutlinedCard(shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(15.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Icon(Icons.Filled.UploadFile, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        AppIcon(IconAsset.Resource(R.drawable.ic_upload_file), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         Column(Modifier.weight(1f)) {
                             Text("Snapshot ou delta", fontWeight = FontWeight.SemiBold)
                             Text("A prévia mostra versões, hash e quantidade de alterações antes de gravar.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                     Button(onClick = onImport, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
-                        Icon(Icons.Filled.CloudUpload, contentDescription = null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text("Selecionar arquivo JSON")
+                        AppIcon(IconAsset.Resource(R.drawable.ic_cloud_upload), contentDescription = null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text("Selecionar arquivo JSON")
                     }
                 }
             }
@@ -1056,9 +1059,9 @@ private fun DataScreen(
         item {
             SectionHeading("Exportar", "Arquivos para backup, pesquisa e validação do próximo lote.")
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                ExportRow("Pacote de trabalho", "Contexto compacto para a próxima rodada do ChatGPT.", Icons.Filled.MenuBook) { onExport("workset") }
-                ExportRow("Snapshot completo", "Backup portátil de todo o acervo e sua versão.", Icons.Filled.Inventory2) { onExport("snapshot") }
-                ExportRow("Schema JSON", "Contrato de dados para preparar os arquivos de carga.", Icons.Filled.Description) { onExport("schema") }
+                ExportRow("Pacote de trabalho", "Contexto compacto para a próxima rodada do ChatGPT.", IconAsset.Resource(R.drawable.ic_menu_book)) { onExport("workset") }
+                ExportRow("Snapshot completo", "Backup portátil de todo o acervo e sua versão.", IconAsset.Resource(R.drawable.ic_inventory_2)) { onExport("snapshot") }
+                ExportRow("Schema JSON", "Contrato de dados para preparar os arquivos de carga.", IconAsset.Resource(R.drawable.ic_description)) { onExport("schema") }
             }
         }
         item {
@@ -1096,10 +1099,10 @@ private fun DataScreen(
 }
 
 @Composable
-private fun ExportRow(title: String, description: String, icon: ImageVector, onClick: () -> Unit) {
+private fun ExportRow(title: String, description: String, icon: IconAsset, onClick: () -> Unit) {
     OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            AppIcon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(title, fontWeight = FontWeight.SemiBold)
                 Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -1113,7 +1116,7 @@ private fun ExportRow(title: String, description: String, icon: ImageVector, onC
 private fun ImportPreviewDialog(preview: PackagePreview, busy: Boolean, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = { if (!busy) onDismiss() },
-        icon = { Icon(if (preview.canImport) Icons.Filled.CheckCircle else Icons.Filled.ErrorOutline, contentDescription = null, tint = if (preview.canImport) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error) },
+        icon = { AppIcon(if (preview.canImport) IconAsset.Vector(Icons.Filled.CheckCircle) else IconAsset.Resource(R.drawable.ic_error_outline), contentDescription = null, tint = if (preview.canImport) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error) },
         title = { Text(if (preview.canImport) "Conferir atualização" else "Arquivo não aprovado") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

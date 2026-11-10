@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Converted from AndroidX Compose Material Icons 1.7.8; see LICENSES/NOTICE. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24" android:autoMirrored="true">
+    <path android:fillColor="#FF000000" android:pathData="M 7.0 9.0 H 2.0 V 7.0 h 5.0 V 9.0 Z M 7.0 12.0 H 2.0 v 2.0 h 5.0 V 12.0 Z M 20.59 19.0 l -3.83 -3.83 C 15.96 15.69 15.02 16.0 14.0 16.0 c -2.76 0.0 -5.0 -2.24 -5.0 -5.0 s 2.24 -5.0 5.0 -5.0 s 5.0 2.24 5.0 5.0 c 0.0 1.02 -0.31 1.96 -0.83 2.75 L 22.0 17.59 L 20.59 19.0 Z M 17.0 11.0 c 0.0 -1.65 -1.35 -3.0 -3.0 -3.0 s -3.0 1.35 -3.0 3.0 s 1.35 3.0 3.0 3.0 S 17.0 12.65 17.0 11.0 Z M 2.0 19.0 h 10.0 v -2.0 H 2.0 V 19.0 Z" />
+</vector>

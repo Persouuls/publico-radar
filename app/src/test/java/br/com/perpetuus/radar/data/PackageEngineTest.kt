@@ -1,5 +1,6 @@
 package br.com.perpetuus.radar.data
 
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
@@ -32,7 +33,7 @@ class PackageEngineTest {
     @Test fun canonicalizationSortsObjectKeysAndPreservesArrayOrder() {
         val payload = buildJsonObject {
             put("z", 1)
-            put("a", buildJsonArray { add(3); add(2) })
+            put("a", buildJsonArray { add(JsonPrimitive(3)); add(JsonPrimitive(2)) })
         }
         assertEquals("{\"a\":[3,2],\"z\":1}", PackageEngine.canonicalize(payload))
     }
@@ -80,7 +81,7 @@ class PackageEngineTest {
         val raw = PackageEngine.buildPackage("workset", 0, 0, payload)
         val preview = PackageEngine.inspect(raw, 0, emptySet())
         assertFalse(preview.canImport)
-        assertTrue(preview.errors.any { it.contains("não pode ser importado") })
+        assertTrue(preview.errors.any { it.contains("não pode ser importado", ignoreCase = true) })
     }
 
     @Test fun worksetKeepsArchivedRecordsInIndexButDoesNotSelectThemForReview() {
