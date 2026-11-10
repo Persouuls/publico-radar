@@ -1,0 +1,31 @@
+{
+  "manifest": {
+    "app_id": "radar-nacional",
+    "schema_version": 1,
+    "package_type": "snapshot",
+    "previous_version": 0,
+    "data_version": 1,
+    "created_at": "PREENCHER_COM_DATA_E_HORA_ISO_8601",
+    "checksum_algorithm": "SHA-256",
+    "checksum_sha256": null,
+    "description": "MODELO VAZIO. Não importar antes de preencher a data e calcular o SHA-256 real do payload."
+  },
+  "payload": {
+    "records": [],
+    "people": [],
+    "institutions": [],
+    "events": [],
+    "sources": [],
+    "monitoring": [
+      {
+        "id": "state",
+        "last_run_at": null,
+        "source_checkpoints": [],
+        "record_states": [],
+        "coverage_gaps": [],
+        "pending_review": [],
+        "note": "Estado inicial. Nenhuma fonte foi consultada ainda."
+      }
+    ]
+  }
+}
